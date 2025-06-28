@@ -1,7 +1,6 @@
 import { markup } from "./_markup";
 import { askGPT } from "./askGPT";
 import { getCity } from "./city";
-import { generatePDF } from "./generatePDF";
 import { generatePdfFromMarkdown } from "./pdfGenerator/generatePdfFromMarkdown";
 import { getPlaces } from "./places";
 import { saveToFile } from "./saveToFile";
