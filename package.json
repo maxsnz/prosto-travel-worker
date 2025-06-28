@@ -1,0 +1,39 @@
+{
+  "name": "prosto-travel-worker",
+  "version": "1.0.0",
+  "description": "",
+  "type": "module",
+  "scripts": {
+    "start": "tsx ./src/index.ts",
+    "dev": "tsx watch ./src/index.ts",
+    "test": "tsx ./src/test.ts"
+  },
+  "dependencies": {
+    "@types/marked": "^6.0.0",
+    "@types/node": "^22.15.29",
+    "@types/pdfmake": "^0.2.11",
+    "cheerio": "^1.0.0",
+    "dotenv": "^16.5.0",
+    "form-data": "^4.0.2",
+    "http": "^0.0.1-security",
+    "image-type": "^6.0.0",
+    "marked": "^15.0.12",
+    "node-fetch": "^3.3.2",
+    "openai": "^5.0.1",
+    "pdfkit": "^0.17.1",
+    "pdfmake": "^0.2.20",
+    "sharp": "^0.34.2",
+    "telegraf": "^4.16.3",
+    "tsx": "^4.19.4",
+    "undici": "^7.10.0"
+  },
+  "author": "maxsnz",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/cheerio": "^1.0.0",
+    "@types/image-type": "^4.0.1",
+    "@types/node-fetch": "^2.6.12",
+    "@types/pdfkit": "^0.13.9",
+    "@types/sharp": "^0.32.0"
+  }
+}
