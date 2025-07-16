@@ -1,26 +1,51 @@
 import { Worker, Queue } from "bullmq";
 import IORedis from "ioredis";
+import { guideService } from "../services";
+import generateGuideHtml from "../generateGuideHtml";
+import { generateGuideHash } from "../utils/generateHash";
 
-const connection = new IORedis();
+const connection = new IORedis({
+  maxRetriesPerRequest: null,
+});
 
-const guideGeneratedQueue = new Queue("guide-generated", { connection });
+const guideGeneratedQueue = new Queue("generate-guide-response", {
+  connection,
+});
 
 const generationWorker = new Worker(
-  "generate-guide",
+  "generate-guide-request",
   async (job) => {
-    const { guideId, userId, city, templateVersion } = job.data;
+    const { guideId, userId } = job.data;
+    try {
+      console.log("[WORKER] Generating guide", job.data);
 
-    console.log("[WORKER] Generating guide for", city);
+      const htmlContent = await generateGuideHtml(guideId);
 
-    // TODO: Implement generation logic
-    // const htmlContent = await generateGuideHTML(city, templateVersion);
+      console.log("[WORKER] Guide generated");
 
-    // await saveGuideToStrapi(guideId, htmlContent);
+      const guideHash = generateGuideHash(guideId, userId);
 
-    await guideGeneratedQueue.add("guide-generated", {
-      guideId,
-      userId,
-    });
+      await guideService.updateGuide(guideId, {
+        htmlContent,
+        status: "ready",
+        publicId: guideHash,
+      });
+
+      await guideGeneratedQueue.add("generate-guide-response", {
+        guideId,
+        userId,
+        isSuccess: true,
+        guideHash,
+      });
+    } catch (error) {
+      console.error("[WORKER] Error generating guide", error);
+
+      await guideGeneratedQueue.add("generate-guide-response", {
+        guideId,
+        userId,
+        isSuccess: false,
+      });
+    }
   },
   { connection }
 );

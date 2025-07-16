@@ -1,13 +1,14 @@
 {
   "name": "prosto-travel-worker",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "description": "",
   "type": "module",
   "author": "maxsnz",
   "license": "ISC",
   "scripts": {
     "start": "tsx ./src/queues/generationWorker.ts",
-    "dev": "tsx watch ./src/queues/generationWorker.ts"
+    "dev": "tsx watch ./src/queues/generationWorker.ts",
+    "dev-server": "tsx watch ./src/dev-server.ts"
   },
   "dependencies": {
     "@types/node": "^22.15.29",
@@ -18,7 +19,20 @@
     "marked": "^15.0.12",
     "node-fetch": "^3.3.2",
     "openai": "^5.0.1",
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0",
+    "react-markdown": "^10.1.0",
     "telegraf": "^4.16.3",
-    "tsx": "^4.19.4"
+    "tsx": "^4.20.3",
+    "typescript": "^5.8.3",
+    "zod": "^3.25.73"
+  },
+  "devDependencies": {
+    "@koa/router": "^13.1.0",
+    "@types/koa": "^2.15.0",
+    "@types/koa__router": "^12.0.4",
+    "@types/react": "^19.1.8",
+    "@types/react-dom": "^19.1.6",
+    "koa": "^3.0.0"
   }
 }
