@@ -48,16 +48,19 @@ export class CityGuideService {
       planPrompt: response.data.attributes.planPrompt,
       cityId: response.data.attributes.city.data.id,
       cityName: response.data.attributes.city.data.attributes.name,
-      cover: response.data.attributes.cover.data.attributes,
-      gallery_1: response.data.attributes.gallery_1.data.map(
-        (item) => item.attributes
-      ),
-      gallery_2: response.data.attributes.gallery_2.data.map(
-        (item) => item.attributes
-      ),
-      gallery_3: response.data.attributes.gallery_3.data.map(
-        (item) => item.attributes
-      ),
+      cover: response.data.attributes.cover?.data?.attributes || undefined,
+      gallery_1:
+        response.data.attributes.gallery_1?.data?.map(
+          (item) => item.attributes
+        ) || [],
+      gallery_2:
+        response.data.attributes.gallery_2?.data?.map(
+          (item) => item.attributes
+        ) || [],
+      gallery_3:
+        response.data.attributes.gallery_3?.data?.map(
+          (item) => item.attributes
+        ) || [],
     };
 
     return city;

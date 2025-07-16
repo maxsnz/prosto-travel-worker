@@ -53,7 +53,7 @@ export interface CityGuide {
   resources?: string;
   planPrompt?: string;
   cityId: number;
-  cover: MediaAttributes;
+  cover?: MediaAttributes;
   gallery_1: MediaAttributes[];
   gallery_2: MediaAttributes[];
   gallery_3: MediaAttributes[];
@@ -72,10 +72,10 @@ export interface CityGuideAttributes {
   resources?: string;
   planPrompt?: string;
   city: { data: CityData };
-  cover: { data: MediaData };
-  gallery_1: { data: MediaData[] };
-  gallery_2: { data: MediaData[] };
-  gallery_3: { data: MediaData[] };
+  cover?: { data: MediaData };
+  gallery_1?: { data: MediaData[] };
+  gallery_2?: { data: MediaData[] };
+  gallery_3?: { data: MediaData[] };
 }
 
 export interface CityGuideData {
