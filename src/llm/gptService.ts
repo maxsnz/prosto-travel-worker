@@ -47,38 +47,12 @@ export class GPTService {
     return new Promise((resolve) => setTimeout(resolve, ms));
   }
 
-  private async makeGPTRequest(
-    systemPrompt: string,
-    userPrompt: string,
-    model: string = "gpt-4o",
-    previousResponse?: string,
-    validationError?: string
-  ) {
-    const messages: Array<{ role: "system" | "user"; content: string }> = [
-      { role: "system", content: systemPrompt },
-      { role: "user", content: userPrompt },
-    ];
-
-    if (previousResponse && validationError) {
-      const correctionPrompt = `Your previous response had validation errors. Please fix them and provide a correct response.
-
-Previous response:
-${previousResponse}
-
-Validation errors:
-${validationError}
-
-Please provide a corrected response that follows the JSON schema exactly.`;
-
-      messages.push({ role: "user", content: correctionPrompt });
-    }
-
-    return await this.openai.chat.completions.create({
-      model,
-      response_format: { type: "json_object" },
-      temperature: 0.8,
-      messages,
-    });
+  private buildCorrectionPrompt(
+    previousResponse: string,
+    validationError: string,
+    originalPrompt: string
+  ): string {
+    return `Your previous response had validation errors. Please fix them and provide a correct response.\n\nPrevious response:\n${previousResponse}\n\nValidation errors:\n${validationError}\n\nPlease provide a corrected response that follows the JSON schema exactly.\n\nOriginal request:\n${originalPrompt}`;
   }
 
   private async processGPTResponse(
@@ -97,11 +71,14 @@ Please provide a corrected response that follows the JSON schema exactly.`;
 
     const validationResult = safeValidateGPTResponse(json);
     if (!validationResult.success) {
-      console.error("Validation failed:", validationResult.error);
+      const errorMessage = (
+        validationResult as { success: false; error: string }
+      ).error;
+      console.error("Validation failed:", errorMessage);
 
       return {
         success: false,
-        error: validationResult.error,
+        error: errorMessage,
         response: text,
         cost: costCalculation.totalCost,
       };
@@ -139,12 +116,19 @@ Please provide a corrected response that follows the JSON schema exactly.`;
       try {
         console.log(`Asking GPT (attempt ${attempt}/${this.maxRetries})`);
 
+        // Prepare the full user prompt for this attempt
+        let fullUserPrompt = userPrompt;
+        if (attempt > 1 && previousResponse && validationError) {
+          fullUserPrompt = this.buildCorrectionPrompt(
+            previousResponse,
+            validationError,
+            userPrompt
+          );
+        }
+
         const llmRequest = await llmRequestService.createLLMRequest({
           systemPrompt,
-          userPrompt:
-            attempt === 1
-              ? userPrompt
-              : `Correction attempt ${attempt}: ${userPrompt}`,
+          userPrompt: fullUserPrompt,
           guideId: guide.id,
           model,
         });
@@ -206,6 +190,38 @@ Please provide a corrected response that follows the JSON schema exactly.`;
     throw new Error(
       `All ${this.maxRetries} attempts failed. Last error: ${lastError?.message}`
     );
+  }
+
+  private async makeGPTRequest(
+    systemPrompt: string,
+    userPrompt: string,
+    model: string = "gpt-4o",
+    previousResponse?: string,
+    validationError?: string
+  ) {
+    const messages: Array<{ role: "system" | "user"; content: string }> = [
+      { role: "system", content: systemPrompt },
+      { role: "user", content: userPrompt },
+    ];
+
+    // If we have a previous response and validation error, add correction context
+    if (previousResponse && validationError) {
+      messages.push({
+        role: "user",
+        content: this.buildCorrectionPrompt(
+          previousResponse,
+          validationError,
+          userPrompt
+        ),
+      });
+    }
+
+    return await this.openai.chat.completions.create({
+      model,
+      response_format: { type: "json_object" },
+      temperature: 0.8,
+      messages,
+    });
   }
 }
 
