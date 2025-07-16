@@ -9,6 +9,7 @@ interface EnvironmentConfig {
   REDIS_URL: string;
   STRAPI_TOKEN: string;
   STRAPI_HOST: string;
+  PROXY_URL?: string;
 }
 
 function validateEnv(): EnvironmentConfig {
@@ -34,6 +35,7 @@ function validateEnv(): EnvironmentConfig {
     REDIS_URL: process.env.REDIS_URL!,
     STRAPI_TOKEN: process.env.STRAPI_TOKEN!,
     STRAPI_HOST: process.env.STRAPI_HOST!,
+    PROXY_URL: process.env.PROXY_URL,
   };
 }
 

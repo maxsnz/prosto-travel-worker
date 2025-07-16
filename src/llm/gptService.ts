@@ -6,15 +6,40 @@ import { systemPrompt } from "./systemPrompt";
 import { llmRequestService } from "../services/llmRequestService";
 import { safeValidateGPTResponse, GPTResponse } from "./schema";
 import { calculateGPTCost, getCostBreakdown } from "./costCalculator";
+import fetch from "node-fetch";
+import { HttpsProxyAgent } from "https-proxy-agent";
 
 export class GPTService {
   private openai: OpenAI;
   private maxRetries: number = 3;
   private retryDelay: number = 1000;
+  private proxyUrl: string | null = null;
 
   constructor() {
+    this.proxyUrl = env.PROXY_URL || null;
     this.openai = new OpenAI({
       apiKey: env.OPENAI_API_KEY,
+      // @ts-expect-error
+      fetch: this.createFetch(),
+    });
+  }
+
+  private createFetch() {
+    return async (url: string, init?: any) => {
+      if (this.proxyUrl) {
+        const agent = new HttpsProxyAgent(this.proxyUrl);
+        return fetch(url, { ...init, agent });
+      }
+      return fetch(url, init);
+    };
+  }
+
+  async updateProxyUrl(url: string) {
+    this.proxyUrl = url;
+    this.openai = new OpenAI({
+      apiKey: env.OPENAI_API_KEY,
+      // @ts-expect-error
+      fetch: this.createFetch(),
     });
   }
 
