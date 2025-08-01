@@ -25,13 +25,11 @@ const Summary = ({ summary }: Props) => (
       </thead>
       <tbody>
         {summary.map((day) => (
-          <tr>
-            <td width="10%">1</td>
-            <td width="30%">
-              Завтрак в кофейне «Маяк», Золотые ворота, Дмитриевский собор
-            </td>
-            <td width="30%">Музей-башня, книжная лавка, обед и кофе-брейк</td>
-            <td width="30%">Козлов вал + ужин в 22А Kitchen &amp; Bar</td>
+          <tr key={day.day}>
+            <td width="10%">{day.day}</td>
+            <td width="30%">{day.morning}</td>
+            <td width="30%">{day.afternoon}</td>
+            <td width="30%">{day.evening}</td>
           </tr>
         ))}
       </tbody>
