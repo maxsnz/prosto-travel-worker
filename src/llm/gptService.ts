@@ -84,6 +84,22 @@ export class GPTService {
       };
     }
 
+    // Validate places after schema validation
+    const placeValidationResult = await this.placeValidation(
+      validationResult.data
+    );
+    if (!placeValidationResult.success) {
+      const errorMessage = placeValidationResult.error;
+      console.error("Place validation failed:", errorMessage);
+
+      return {
+        success: false,
+        error: errorMessage,
+        response: text,
+        cost: costCalculation.totalCost,
+      };
+    }
+
     await llmRequestService.updateLLMRequest(llmRequestId, {
       completion: JSON.stringify(validationResult.data),
       status: "done",
@@ -97,6 +113,41 @@ export class GPTService {
     };
   }
 
+  private async placeValidation(
+    data: GPTResponse
+  ): Promise<{ success: true } | { success: false; error: string }> {
+    const errors: string[] = [];
+
+    for (const scheduleDay of data.schedule) {
+      for (const planItem of scheduleDay.plan) {
+        // Check if placeId exists
+        const place = placeService.getPlaceByIdSync(planItem.placeId);
+        if (!place) {
+          errors.push(
+            `Place with ID ${planItem.placeId} not found in schedule day ${scheduleDay.day}, plan item ${planItem.index}`
+          );
+          continue;
+        }
+
+        // Check if title matches the actual place name
+        if (planItem.placeTitle !== place.name) {
+          errors.push(
+            `Title mismatch in schedule day ${scheduleDay.day}, plan item ${planItem.index}: expected "${place.name}" but got "${planItem.placeTitle}"`
+          );
+        }
+      }
+    }
+
+    if (errors.length > 0) {
+      return {
+        success: false,
+        error: `Place validation failed: ${errors.join("; ")}`,
+      };
+    }
+
+    return { success: true };
+  }
+
   async askGPT({
     guide,
     cityGuide,
@@ -104,6 +155,8 @@ export class GPTService {
     cityGuide: CityGuide;
     guide: Guide;
   }): Promise<GPTResponse> {
+    // Preload all places for the city to ensure they're available in cache for validation
+    await placeService.preloadPlacesForCity(cityGuide.cityId);
     const places = await placeService.getPlacesByCity(cityGuide.cityId);
     const userPrompt = getUserPrompt({ cityGuide, days: guide.days, places });
     const model = "gpt-4o";

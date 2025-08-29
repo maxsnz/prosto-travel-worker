@@ -13,6 +13,8 @@ export const getUserPrompt = ({
     .map((p, i) => {
       const lines = [`${i + 1}. ${p.name}`];
 
+      lines.push(`placeId: ${p.id}`);
+      lines.push(`placeTitle: ${p.name}`);
       if (p.address) lines.push(`Адрес: ${p.address}`);
       if (p.description) lines.push(`Описание: ${p.description}`);
       if (p.coords) lines.push(`Координаты: ${p.coords}`);

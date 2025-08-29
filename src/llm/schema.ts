@@ -7,6 +7,7 @@ const PlanItemSchema = z.object({
   title: z.string().min(1),
   description: z.string().min(1),
   placeId: z.number().int().positive(),
+  placeTitle: z.string().min(1),
 });
 
 // Schema for place information
@@ -25,7 +26,6 @@ const ScheduleDaySchema = z.object({
   day: z.number().int().positive(),
   title: z.string().min(1),
   plan: z.array(PlanItemSchema).min(1),
-  places: z.array(PlaceSchema).min(1),
 });
 
 // Schema for daily summary

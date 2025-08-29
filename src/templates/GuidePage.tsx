@@ -20,15 +20,17 @@ export default function GuidePage({ guideSchedule, guide, cityGuide }: Props) {
         <style>{styles}</style>
       </head>
       <body>
-        <div
-          className="cover-container"
-          style={{
-            backgroundImage: `url(${cityGuide.cover.url})`,
-          }}
-        >
-          <div className="cover-filter"></div>
-          <h1 className="cover-title">{cityGuide.name}</h1>
-        </div>
+        {cityGuide.cover?.url && (
+          <div
+            className="cover-container"
+            style={{
+              backgroundImage: `url(${cityGuide.cover.url})`,
+            }}
+          >
+            <div className="cover-filter"></div>
+            <h1 className="cover-title">{cityGuide.name}</h1>
+          </div>
+        )}
         <div className="t-container markdown">
           <Markdown>{cityGuide.intro}</Markdown>
         </div>
